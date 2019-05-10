@@ -77,7 +77,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 leftUp: {
@@ -87,7 +87,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 up: {
@@ -97,7 +97,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 right: {
@@ -107,7 +107,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 rightUp: {
@@ -117,7 +117,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 rightDown: {
@@ -127,7 +127,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 down: {
@@ -137,7 +137,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
                 leftDown: {
@@ -147,7 +147,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 5,
+                    framesToSkip: 2,
                     skippedFrames: 0
                 },
             }
@@ -164,8 +164,8 @@ window.onload = async () => {
                 animation.height,
                 this.position.x,
                 this.position.y,
-                48,
-                48)
+                64,
+                64)
 
             if(animation.frames <= 1){
                 return

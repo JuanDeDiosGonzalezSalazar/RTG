@@ -10,7 +10,7 @@ class Player{
             x: x,
             y: y
         }
-        this.speed = 0.5
+        this.speed = 1
         this.color = randomColor()
         this.moving = {
             left: false,
