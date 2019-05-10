@@ -1,7 +1,9 @@
 const express = require('express')
 const app = express()
+const dotenv = require('dotenv')
+dotenv.config()
 
-port = 4000
+const port = process.env.WEB_SERVER_PORT
 
 app.use(express.static('./src/views'))
 app.use(express.static('./src/assets'))

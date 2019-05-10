@@ -1,4 +1,5 @@
 const io = require('socket.io')
+const port = process.env.GAME_SERVER_PORT
 const server = io(5000)
 
 class Player{

@@ -5,6 +5,8 @@ window.onload = async () => {
     canvas.width = 600
     canvas.height = 400
 
+    const server = location.hostname
+
     const tilemap = new Image()
     tilemap.src = '/images/tilemap.png'
 
@@ -39,7 +41,7 @@ window.onload = async () => {
     
     window.requestAnimationFrame = requestAnimationFrame;
 
-    const socket = io('192.168.1.112:5000', {autoConnect: true})
+    const socket = io(`${server}:5000`, {autoConnect: true})
     let connected = await new Promise((resolve, reject) => {
         socket.on('connect', () => {
             resolve(true)
