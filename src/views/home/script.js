@@ -2,8 +2,8 @@ window.onload = async () => {
     let canvas = document.getElementById('canvas')
     let context = canvas.getContext('2d')
 
-    canvas.width = 600
-    canvas.height = 400
+    canvas.width = 918
+    canvas.height = 515
 
     const server = location.hostname
 
@@ -23,7 +23,7 @@ window.onload = async () => {
     }
 
     const playerSprite = new Image()
-    playerSprite.src = '/images/player/sprite.png'
+    playerSprite.src = '/images/player/robot.png'
     imageLoaded = await new Promise((resolve, reject) => {
         playerSprite.onload = () => {
             resolve(true)
@@ -59,7 +59,6 @@ window.onload = async () => {
             this.moving = moving
             this.color = color
             this.currentAnimation = 'stand'
-            this.animationSpeed = 60
             this.animations = {
                 stand: {
                     x: 0,
@@ -67,45 +66,94 @@ window.onload = async () => {
                     width: 64,
                     height: 64,
                     frames: 1,
-                    currentFrame: 0
+                    currentFrame: 0,
+                    framesToSkip: 60,
+                    skippedFrames: 0
                 },
                 left: {
                     x: 0,
-                    y: 64,
+                    y: 384,
                     width: 64,
                     height: 64,
-                    frames: 3,
-                    currentFrame: 0
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
+                },
+                leftUp: {
+                    x: 0,
+                    y: 320,
+                    width: 64,
+                    height: 64,
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
                 },
                 up: {
                     x: 0,
-                    y: 192,
+                    y: 256,
                     width: 64,
                     height: 64,
-                    frames: 3,
-                    currentFrame: 0
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
                 },
                 right: {
                     x: 0,
                     y: 128,
                     width: 64,
                     height: 64,
-                    frames: 3,
-                    currentFrame: 0
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
+                },
+                rightUp: {
+                    x: 0,
+                    y: 192,
+                    width: 64,
+                    height: 64,
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
+                },
+                rightDown: {
+                    x: 0,
+                    y: 64,
+                    width: 64,
+                    height: 64,
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
                 },
                 down: {
                     x: 0,
                     y: 0,
                     width: 64,
                     height: 64,
-                    frames: 3,
-                    currentFrame: 0
-                }
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
+                },
+                leftDown: {
+                    x: 0,
+                    y: 448,
+                    width: 64,
+                    height: 64,
+                    frames: 16,
+                    currentFrame: 0,
+                    framesToSkip: 5,
+                    skippedFrames: 0
+                },
             }
         }
 
         draw(){
-            ('Current Animation: ', this.currentAnimation)
             context.fillStyle = this.color
             let animation = this.animations[this.currentAnimation]
 
@@ -116,8 +164,24 @@ window.onload = async () => {
                 animation.height,
                 this.position.x,
                 this.position.y,
-                24,
-                24)
+                48,
+                48)
+
+            if(animation.frames <= 1){
+                return
+            }
+
+            if(animation.skippedFrames < animation.framesToSkip){
+                animation.skippedFrames++
+            }else{
+                animation.skippedFrames = 0
+            }
+
+            if(!animation.skippedFrames && (animation.currentFrame < animation.frames - 1)){
+                animation.currentFrame++
+            }else if(animation.currentFrame >= animation.frames - 1){
+                animation.currentFrame = 0
+            }
         }
     }
 
@@ -193,9 +257,13 @@ window.onload = async () => {
                 players[id].position = onlinePlayers[id].position
                 players[id].moving = onlinePlayers[id].moving
 
-                if(players[id].moving.left){
-                    players[id].currentAnimation = 'left'
-                }
+                if(!players[id].moving.left &&
+                    !players[id].moving.left &&
+                    !players[id].moving.left &&
+                    !players[id].moving.left){
+                        players[id].currentAnimation = 'stand'
+                    }
+                
                 if(players[id].moving.up){
                     players[id].currentAnimation = 'up'
                 }
@@ -204,6 +272,22 @@ window.onload = async () => {
                 }
                 if(players[id].moving.down){
                     players[id].currentAnimation = 'down'
+                }
+                if(players[id].moving.left){
+                    players[id].currentAnimation = 'left'
+                }
+
+                if(players[id].moving.right && players[id].moving.up){
+                    players[id].currentAnimation = 'rightUp'
+                }
+                if(players[id].moving.right && players[id].moving.down){
+                    players[id].currentAnimation = 'rightDown'
+                }
+                if(players[id].moving.left && players[id].moving.down){
+                    players[id].currentAnimation = 'leftDown'
+                }
+                if(players[id].moving.left && players[id].moving.up){
+                    players[id].currentAnimation = 'leftUp'
                 }
 
                 players[id].draw()

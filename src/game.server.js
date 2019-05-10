@@ -10,6 +10,7 @@ class Player{
             x: x,
             y: y
         }
+        this.speed = 0.5
         this.color = randomColor()
         this.moving = {
             left: false,
@@ -174,19 +175,19 @@ function gameLoop(currentFrame){
 
     Object.keys(players).forEach((id) => {
         if(players[id].moving.left){
-            players[id].position.x -= 4
+            players[id].position.x -= players[id].speed
         }
 
         if(players[id].moving.up){
-            players[id].position.y -= 4
+            players[id].position.y -= players[id].speed
         }
 
         if(players[id].moving.right){
-            players[id].position.x += 4
+            players[id].position.x += players[id].speed
         }
 
         if(players[id].moving.down){
-            players[id].position.y += 4
+            players[id].position.y += players[id].speed
         }
 
         onlinePlayers[id] = {
