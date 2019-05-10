@@ -10,7 +10,15 @@ class Player{
             x: x,
             y: y
         }
-        this.speed = 1
+        this.width = 64
+        this.heigth = 64
+        this.boundingBox = {
+            top: 0,
+            left: 0,
+            right: this.width,
+            bottom: this.height
+        }
+        this.speed = 2
         this.color = randomColor()
         this.moving = {
             left: false,
@@ -48,7 +56,10 @@ server.on('connection', (socket) => {
             id: player.id,
             position: player.position,
             color: player.color,
-            moving: player.moving
+            moving: player.moving,
+            boundingBox: players[id].boundingBox,
+            width: players[id].width,
+            height: players[id].heigth
         }
     })
 
@@ -58,7 +69,10 @@ server.on('connection', (socket) => {
         id: player.id,
         position: player.position,
         color: player.color,
-        moving: player.moving
+        moving: player.moving,
+        boundingBox: player.boundingBox,
+        width: player.width,
+        height: player.heigth
     }
 
     let serverStatus = {
@@ -144,7 +158,7 @@ let timedFrame = 0
 
 function loop(){
     if((endTime - startTime) >= 1000) {
-        framesToSkip = frame/60
+        framesToSkip = frame/30
 
         startTime = Date.now()
         frame = 0
@@ -170,10 +184,50 @@ function loop(){
 
 setImmediate(loop)
 
-function gameLoop(currentFrame){
-    // console.log('Current Frame: ', currentFrame)
+function testCollision(a, b){
+    console.log(a.boundingBox)
+    console.log(b.boundingBox)
+    if(
+        a.boundingBox.top <= b.boundingBox.bottom &&
+        a.boundingBox.top >= b.boundingBox.top &&
+        a.boundingBox.left <= b.boundingBox.right &&
+        a.boundingBox.left >= b.boundingBox.left){
+            return true
+    }
+    if(
+        a.boundingBox.top <= b.boundingBox.bottom &&
+        a.boundingBox.top >= b.boundingBox.top &&
+        a.boundingBox.right >= b.boundingBox.left &&
+        a.boundingBox.right <= b.boundingBox.left){
+            return true
+    }
+    if(
+        a.boundingBox.bottom >= b.boundingBox.top &&
+        a.boundingBox.botom <= b.boundingBox.bottom &&
+        a.boundingBox.right >= b.boundingBox.left &&
+        a.boundingBox.right >= b.boundingBox.right){
+            return true
+    }
+    if(
+        a.boundingBox.bottom <= b.boundingBox.bottom &&
+        a.boundingBox.bottom >= b.boundingBox.top &&
+        a.boundingBox.left >= b.boundingBox.left &&
+        a.boundingBox.left <= b.boundingBox.right){
+            return true
+    }
 
+    return false
+}
+
+function gameLoop(currentFrame){
     Object.keys(players).forEach((id) => {
+        Object.keys(players).forEach((id2) => {
+            if(players[id] != players[id2]){
+                let collides = testCollision(players[id], players[id2])
+                console.log('Collides: ', collides)
+            }
+        })
+
         if(players[id].moving.left){
             players[id].position.x -= players[id].speed
         }
@@ -190,11 +244,19 @@ function gameLoop(currentFrame){
             players[id].position.y += players[id].speed
         }
 
+        players[id].boundingBox.left = players[id].position.x
+        players[id].boundingBox.top = players[id].position.y
+        players[id].boundingBox.right = players[id].position.x + players[id].width
+        players[id].boundingBox.bottom = players[id].position.y + players[id].heigth
+
         onlinePlayers[id] = {
             id: id,
             position: players[id].position,
             color: players[id].color,
-            moving: players[id].moving
+            moving: players[id].moving,
+            boundingBox: players[id].boundingBox,
+            width: players[id].width,
+            heigth: players[id].heigth
         }
     })
 

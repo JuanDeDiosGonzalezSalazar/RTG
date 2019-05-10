@@ -5,6 +5,8 @@ window.onload = async () => {
     canvas.width = 918
     canvas.height = 515
 
+    let showBoundingBoxes = false
+
     const server = location.hostname
 
     const tilemap = new Image()
@@ -53,12 +55,15 @@ window.onload = async () => {
     console.log('Connected')
 
     class Player{
-        constructor(id, position, color, moving = {left: false, up: false, right: false, down: false}){
+        constructor(id, position, width, heigth, boundingBox, color, moving = {left: false, up: false, right: false, down: false}){
             this.id = id
             this.position = position
             this.moving = moving
             this.color = color
             this.currentAnimation = 'stand'
+            this.boundingBox = boundingBox
+            this.width = width
+            this.heigth = heigth
             this.animations = {
                 stand: {
                     x: 0,
@@ -67,7 +72,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 1,
                     currentFrame: 0,
-                    framesToSkip: 60,
+                    framesToSkip: 0,
                     skippedFrames: 0
                 },
                 left: {
@@ -77,7 +82,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 leftUp: {
@@ -87,7 +92,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 up: {
@@ -97,7 +102,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 right: {
@@ -107,7 +112,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 rightUp: {
@@ -117,7 +122,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 rightDown: {
@@ -127,7 +132,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 down: {
@@ -137,7 +142,7 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
                 leftDown: {
@@ -147,14 +152,13 @@ window.onload = async () => {
                     height: 64,
                     frames: 16,
                     currentFrame: 0,
-                    framesToSkip: 2,
+                    framesToSkip: 1,
                     skippedFrames: 0
                 },
             }
         }
 
         draw(){
-            context.fillStyle = this.color
             let animation = this.animations[this.currentAnimation]
 
             context.drawImage(playerSprite,
@@ -166,6 +170,12 @@ window.onload = async () => {
                 this.position.y,
                 64,
                 64)
+
+            if(showBoundingBoxes){
+                context.strokeStyle = this.color
+                context.strokeRect(this.boundingBox.left, this.boundingBox.top, this.width, this.heigth)
+                console.log(this.width, '-', this.heigth)
+            }
 
             if(animation.frames <= 1){
                 return
@@ -190,7 +200,7 @@ window.onload = async () => {
 
     let gameInitialized = await new Promise((resolve, reject) => {
         socket.on('welcome', (serverStatus) => {        
-            player = new Player(serverStatus.myStatus.id, serverStatus.myStatus.position, serverStatus.myStatus.color, serverStatus.myStatus.moving)
+            player = new Player(serverStatus.myStatus.id, serverStatus.myStatus.position, serverStatus.myStatus.width, serverStatus.myStatus.height, serverStatus.myStatus.boundingBox, serverStatus.myStatus.color, serverStatus.myStatus.moving)
     
             requestAnimationFrame(() => {
                 clearCanvas()
@@ -199,7 +209,7 @@ window.onload = async () => {
                 players = {}
                 Object.keys(serverStatus.onlinePlayers).forEach((id) => {
                     let player = serverStatus.onlinePlayers[id]
-                    let onlinePlayer = new Player(player.id, player.position, player.color, player.moving)
+                    let onlinePlayer = new Player(player.id, player.position, player.width, player.height, player.boundingBox, player.color, player.moving)
     
                     players[id] = onlinePlayer
                     onlinePlayer.draw(onlinePlayer)
@@ -256,6 +266,9 @@ window.onload = async () => {
             Object.keys(players).forEach((id) => {
                 players[id].position = onlinePlayers[id].position
                 players[id].moving = onlinePlayers[id].moving
+                players[id].boundingBox = onlinePlayers[id].boundingBox
+                players[id].width = onlinePlayers[id].width
+                players[id].heigth = onlinePlayers[id].heigth
 
                 if(!players[id].moving.left &&
                     !players[id].moving.left &&
@@ -296,7 +309,7 @@ window.onload = async () => {
     })
 
     socket.on('newPlayer', (player) => {
-        players[player.id] = new Player(player.id, player.position, player.color, player.moving)
+        players[player.id] = new Player(player.id, player.position, player.width, player.height, player.boundingBox, player.color, player.moving)
     })
 
     socket.on('playerLeft', (id) => {
@@ -328,6 +341,16 @@ window.onload = async () => {
             case 40: // Down
                 if(!player.moving.down){
                     socket.emit('moveDown')
+                }
+            break;
+
+            case 49: // Show Bounding Boxes
+                if(!showBoundingBoxes){
+                    showBoundingBoxes = true
+                    console.log('Show bounding boxes:', showBoundingBoxes)
+                }else{
+                    showBoundingBoxes = false
+                    console.log('Show bounding boxes:', showBoundingBoxes)
                 }
             break;
         }
