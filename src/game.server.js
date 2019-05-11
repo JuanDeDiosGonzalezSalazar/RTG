@@ -10,8 +10,13 @@ class Player{
             x: x,
             y: y
         }
+        this.lastPosition = {
+            x: x,
+            y: y
+        }
         this.width = 64
         this.heigth = 64
+        this.stuck = false
         this.boundingBox = {
             top: 0,
             left: 0,
@@ -31,7 +36,7 @@ class Player{
 }
 
 function randomColor(){
-    return '#' + ('0000000' + Math.round(Math.random() * 0xFFFFFF).toString(16)).substr(-6)
+    return '#' + ('00000' + Math.round(Math.random() * 0x333333).toString(16)).substr(-6)
 }
 
 const players = {}
@@ -86,57 +91,57 @@ server.on('connection', (socket) => {
     socket.on('moveLeft', () => {
         if(!player.moving.left){
             player.moving.left = true
-            socket.emit('movingLeft')
+            // socket.emit('movingLeft')
         }
     })
 
     socket.on('stopMovingLeft', () => {
-        if(player.moving.left){
+        // if(player.moving.left){
             player.moving.left = false
-            socket.emit('stoppedMovingLeft')
-        }
+            // socket.emit('stoppedMovingLeft')
+        // }
     })
 
     socket.on('moveUp', () => {
         if(!player.moving.up){
             player.moving.up = true
-            socket.emit('movingUp')
+            // socket.emit('movingUp')
         }
     })
 
     socket.on('stopMovingUp', () => {
-        if(player.moving.up){
+        // if(player.moving.up){
             player.moving.up = false
-            socket.emit('stoppedMovingUp')
-        }
+            // socket.emit('stoppedMovingUp')
+        // }
     })
 
     socket.on('moveRight', () => {
         if(!player.moving.right){
             player.moving.right = true
-            socket.emit('movingRight')
+            // socket.emit('movingRight')
         }
     })
 
     socket.on('stopMovingRight', () => {
-        if(player.moving.right){
+        // if(player.moving.right){
             player.moving.right = false
-            socket.emit('stoppedMovingRight')
-        }
+            // socket.emit('stoppedMovingRight')
+        // }
     })
 
     socket.on('moveDown', () => {
         if(!player.moving.down){
             player.moving.down = true
-            socket.emit('movingDown')
+            // socket.emit('movingDown')
         }
     })
 
     socket.on('stopMovingDown', () => {
-        if(player.moving.down){
+        // if(player.moving.down){
             player.moving.down = false
-            socket.emit('stoppedMovingDown')
-        }
+            // socket.emit('stoppedMovingDown')
+        // }
     })
 
     socket.on('disconnect', () => {
@@ -185,64 +190,120 @@ function loop(){
 setImmediate(loop)
 
 function testCollision(a, b){
-    console.log(a.boundingBox)
-    console.log(b.boundingBox)
+    // console.log(a.boundingBox, b.boundingBox)
+    /*  Collision most be based on diretion the object is moving, it can't
+    *   collide in its bottom if its heading top, another object can reach him from the bottom
+    *   while it is heading top, but that does not mean it can not move top, the other object
+    *   should trigger the collision instead and return to the lastPosition, since is the one reaching an object
+    */
+
+    // console.log(a.moving, b.moving)
+
     if(
-        a.boundingBox.top <= b.boundingBox.bottom &&
         a.boundingBox.top >= b.boundingBox.top &&
-        a.boundingBox.left <= b.boundingBox.right &&
-        a.boundingBox.left >= b.boundingBox.left){
-            return true
-    }
-    if(
         a.boundingBox.top <= b.boundingBox.bottom &&
-        a.boundingBox.top >= b.boundingBox.top &&
-        a.boundingBox.right >= b.boundingBox.left &&
-        a.boundingBox.right <= b.boundingBox.left){
-            return true
-    }
-    if(
-        a.boundingBox.bottom >= b.boundingBox.top &&
-        a.boundingBox.botom <= b.boundingBox.bottom &&
-        a.boundingBox.right >= b.boundingBox.left &&
-        a.boundingBox.right >= b.boundingBox.right){
-            return true
-    }
-    if(
-        a.boundingBox.bottom <= b.boundingBox.bottom &&
-        a.boundingBox.bottom >= b.boundingBox.top &&
         a.boundingBox.left >= b.boundingBox.left &&
         a.boundingBox.left <= b.boundingBox.right){
+            console.log('Top-Left Collides')
+            return true
+    }
+    if(
+        a.boundingBox.top >= b.boundingBox.top &&
+        a.boundingBox.top <= b.boundingBox.bottom &&
+        a.boundingBox.right >= b.boundingBox.left &&
+        a.boundingBox.right <= b.boundingBox.right){
+            console.log('Top-Right Collides')
+            return true
+    }
+    if(
+        a.boundingBox.bottom >= b.boundingBox.top &&
+        a.boundingBox.bottom <= b.boundingBox.bottom &&
+        a.boundingBox.right >= b.boundingBox.left &&
+        a.boundingBox.right <= b.boundingBox.right){
+            console.log('Bottom-Right Collides')
+            return true
+    }
+    if(
+        a.boundingBox.bottom >= b.boundingBox.top &&
+        a.boundingBox.bottom <= b.boundingBox.bottom &&
+        a.boundingBox.left >= b.boundingBox.left &&
+        a.boundingBox.left <= b.boundingBox.right){
+            console.log('Bottom-Left Collides')
             return true
     }
 
-    return false
+    return false    
 }
 
+let idPlayerIndexCollisionTested = 0
 function gameLoop(currentFrame){
     Object.keys(players).forEach((id) => {
-        Object.keys(players).forEach((id2) => {
-            if(players[id] != players[id2]){
-                let collides = testCollision(players[id], players[id2])
-                console.log('Collides: ', collides)
-            }
-        })
+        players[id].lastPosition.x = players[id].position.x
+        players[id].lastPosition.y = players[id].position.y
 
-        if(players[id].moving.left){
-            players[id].position.x -= players[id].speed
-        }
-
-        if(players[id].moving.up){
+        if(players[id].moving.left && players[id].moving.up){
+            players[id].position.x -=  players[id].speed
             players[id].position.y -= players[id].speed
-        }
-
-        if(players[id].moving.right){
+            // players[id].moving = {
+            //     left: true,
+            //     up: true,
+            //     right: false,
+            //     down: false
+            // }
+        }else if(players[id].moving.up && players[id].moving.right){
             players[id].position.x += players[id].speed
-        }
-
-        if(players[id].moving.down){
+            players[id].position.y -= players[id].speed
+            // players[id].moving = {
+            //     left: false,
+            //     up: true,
+            //     right: true,
+            //     down: false
+            // }
+        }else if(players[id].moving.right && players[id].moving.down){
+            players[id].position.x += players[id].speed
+            players[id].position.y += players[id].speed
+            // players[id].moving = {
+            //     left: false,
+            //     up: true,
+            //     right: true,
+            //     down: false
+            // }
+        }else if(players[id].moving.down && players[id].moving.left){
+            players[id].position.x -= players[id].speed
+            players[id].position.y += players[id].speed
+            // players[id].moving = {
+            //     left: false,
+            //     up: true,
+            //     right: true,
+            //     down: false
+            // }
+        }else if(players[id].moving.left){
+            players[id].position.x -= players[id].speed
+        }else if(players[id].moving.up){
+            players[id].position.y -= players[id].speed
+        }else if(players[id].moving.right){
+            players[id].position.x += players[id].speed
+        }else if(players[id].moving.down){
             players[id].position.y += players[id].speed
         }
+
+        idPlayerIndexCollisionTested++
+        Object.keys(players).slice(idPlayerIndexCollisionTested).some((id2) => {
+            let collides = testCollision(players[id], players[id2])
+            // console.log('Stuck?: ', players[id].stuck)
+
+            // if(collides && !players[id].stuck){
+            //     if(players[id].position.x == players[id].lastPosition.x &&
+            //         players[id].position.y == players[id].lastPosition.y){
+            //             players[id].stuck = true
+            //     }else{
+            //         players[id].position.x = players[id].lastPosition.x
+            //         players[id].position.y = players[id].lastPosition.y
+            //     }
+            // }else{
+            //     players[id].stuck = false
+            // }
+        })
 
         players[id].boundingBox.left = players[id].position.x
         players[id].boundingBox.top = players[id].position.y
@@ -259,6 +320,9 @@ function gameLoop(currentFrame){
             heigth: players[id].heigth
         }
     })
+
+    idPlayerIndexCollisionTested = 0
+    // console.log()
 
     server.emit('update', onlinePlayers)
 }

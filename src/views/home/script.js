@@ -166,15 +166,14 @@ window.onload = async () => {
                 animation.y,
                 animation.width,
                 animation.height,
-                this.position.x,
-                this.position.y,
+                this.position.x + canvas.width/2 - this.width/2,
+                this.position.y + canvas.height/2 - this.heigth/2,
                 64,
                 64)
 
             if(showBoundingBoxes){
                 context.strokeStyle = this.color
-                context.strokeRect(this.boundingBox.left, this.boundingBox.top, this.width, this.heigth)
-                console.log(this.width, '-', this.heigth)
+                context.strokeRect(this.boundingBox.left + canvas.width/2 - this.width/2, this.boundingBox.top + canvas.height/2 - this.heigth/2, this.width, this.heigth)
             }
 
             if(animation.frames <= 1){
@@ -226,42 +225,43 @@ window.onload = async () => {
         throw 'Game could not initialize'
     }
 
-    socket.on('movingLeft', () => {
-        player.moving.left = true;
-    })
+    // socket.on('movingLeft', () => {
+    //     player.moving.left = true;
+    // })
 
-    socket.on('stoppedMovingLeft', () => {
-        player.moving.left = false;
-    })
+    // socket.on('stoppedMovingLeft', () => {
+    //     player.moving.left = false;
+    // })
 
-    socket.on('movingUp', () => {
-        player.moving.up = true;
-    })
+    // socket.on('movingUp', () => {
+    //     player.moving.up = true;
+    // })
 
-    socket.on('stoppedMovingUp', () => {
-        player.moving.up = false;
-    })
+    // socket.on('stoppedMovingUp', () => {
+    //     player.moving.up = false;
+    // })
 
-    socket.on('movingRight', () => {
-        player.moving.right = true;
-    })
+    // socket.on('movingRight', () => {
+    //     player.moving.right = true;
+    // })
 
-    socket.on('stoppedMovingRight', () => {
-        player.moving.right = false;
-    })
+    // socket.on('stoppedMovingRight', () => {
+    //     player.moving.right = false;
+    // })
 
-    socket.on('movingDown', () => {
-        player.moving.down = true;
-    })
+    // socket.on('movingDown', () => {
+    //     player.moving.down = true;
+    // })
 
-    socket.on('stoppedMovingDown', () => {
-        player.moving.down = false;
-    })
+    // socket.on('stoppedMovingDown', () => {
+    //     player.moving.down = false;
+    // })
 
     socket.on('update', (onlinePlayers) => {
         requestAnimationFrame(() => {
             clearCanvas()
             drawTilemap()
+            drawAxis()
 
             Object.keys(players).forEach((id) => {
                 players[id].position = onlinePlayers[id].position
@@ -269,6 +269,7 @@ window.onload = async () => {
                 players[id].boundingBox = onlinePlayers[id].boundingBox
                 players[id].width = onlinePlayers[id].width
                 players[id].heigth = onlinePlayers[id].heigth
+                // console.log('UPDATE left:', players[id].moving.left, 'right', players[id].moving.right)
 
                 if(!players[id].moving.left &&
                     !players[id].moving.left &&
@@ -277,30 +278,22 @@ window.onload = async () => {
                         players[id].currentAnimation = 'stand'
                     }
                 
-                if(players[id].moving.up){
-                    players[id].currentAnimation = 'up'
-                }
-                if(players[id].moving.right){
-                    players[id].currentAnimation = 'right'
-                }
-                if(players[id].moving.down){
-                    players[id].currentAnimation = 'down'
-                }
-                if(players[id].moving.left){
-                    players[id].currentAnimation = 'left'
-                }
-
-                if(players[id].moving.right && players[id].moving.up){
-                    players[id].currentAnimation = 'rightUp'
-                }
-                if(players[id].moving.right && players[id].moving.down){
-                    players[id].currentAnimation = 'rightDown'
-                }
-                if(players[id].moving.left && players[id].moving.down){
-                    players[id].currentAnimation = 'leftDown'
-                }
                 if(players[id].moving.left && players[id].moving.up){
                     players[id].currentAnimation = 'leftUp'
+                }else if(players[id].moving.up && players[id].moving.right){
+                    players[id].currentAnimation = 'rightUp'
+                }else if(players[id].moving.right && players[id].moving.down){
+                    players[id].currentAnimation = 'rightDown'
+                }else if(players[id].moving.down && players[id].moving.left){
+                    players[id].currentAnimation = 'leftDown'
+                }else if(players[id].moving.left){
+                    players[id].currentAnimation = 'left'
+                }else if(players[id].moving.up){
+                    players[id].currentAnimation = 'up'
+                }else if(players[id].moving.right){
+                    players[id].currentAnimation = 'right'
+                }else if(players[id].moving.down){
+                    players[id].currentAnimation = 'down'
                 }
 
                 players[id].draw()
@@ -319,6 +312,7 @@ window.onload = async () => {
     })
 
     window.addEventListener('keydown', (e) => {
+        // console.log('left:', player.moving.left, 'right:', player.moving.right)
         switch(e.keyCode){
             case 37: // Left
                 if(!player.moving.left){
@@ -359,27 +353,19 @@ window.onload = async () => {
     window.addEventListener('keyup', (e) => {
         switch(e.keyCode){
             case 37: // Left
-                if(player.moving.left){
-                    socket.emit('stopMovingLeft')
-                }
+                socket.emit('stopMovingLeft')
             break;
 
             case 38: // Up
-                if(player.moving.up){
-                    socket.emit('stopMovingUp')
-                }
+                socket.emit('stopMovingUp')
             break;
 
             case 39: // Right
-                if(player.moving.right){
-                    socket.emit('stopMovingRight')
-                }
+                socket.emit('stopMovingRight')
             break;
 
             case 40: // Down
-                if(player.moving.down){
-                    socket.emit('stopMovingDown')
-                }
+                socket.emit('stopMovingDown')
             break;
         }
     })
@@ -391,5 +377,19 @@ window.onload = async () => {
 
     function drawTilemap(){
         context.drawImage(tilemap, 0, 0)
+    }
+
+    function drawAxis(){
+        context.beginPath()
+        context.strokeStyle = '#FF0000AA'
+        context.moveTo(canvas.width/2, 0)
+        context.lineTo(canvas.width/2, canvas.height)
+        context.stroke()
+        
+        context.beginPath()
+        context.strokeStyle = '#00FF00AA'
+        context.moveTo(0, canvas.height/2)
+        context.lineTo(canvas.width, canvas.height/2)
+        context.stroke()
     }
 }
