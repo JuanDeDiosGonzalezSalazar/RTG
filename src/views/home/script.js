@@ -2,10 +2,11 @@ window.onload = async () => {
     let canvas = document.getElementById('canvas')
     let context = canvas.getContext('2d')
 
-    canvas.width = 918
-    canvas.height = 515
+    canvas.width = 600
+    canvas.height = 400
 
-    let showBoundingBoxes = false
+    let showBoundingBoxes = true
+    let showAxisGuidelines = true
 
     const server = location.hostname
 
@@ -161,19 +162,36 @@ window.onload = async () => {
         draw(){
             let animation = this.animations[this.currentAnimation]
 
-            context.drawImage(playerSprite,
-                animation.x + (animation.currentFrame * animation.width),
-                animation.y,
-                animation.width,
-                animation.height,
-                this.position.x + canvas.width/2 - this.width/2,
-                this.position.y + canvas.height/2 - this.heigth/2,
-                64,
-                64)
+            if(this.id == player.id){
+                context.drawImage(playerSprite,
+                    animation.x + (animation.currentFrame * animation.width),
+                    animation.y,
+                    animation.width,
+                    animation.height,
+                    canvas.width/2 - this.width/2,
+                    canvas.height/2 - this.heigth/2,
+                    64,
+                    64)
+            }else{
+                context.drawImage(playerSprite,
+                    animation.x + (animation.currentFrame * animation.width),
+                    animation.y,
+                    animation.width,
+                    animation.height,
+                    -player.position.x + this.position.x + canvas.width/2 - this.width/2,
+                    -player.position.y + this.position.y + canvas.height/2 - this.heigth/2,
+                    64,
+                    64)
+            }
 
             if(showBoundingBoxes){
-                context.strokeStyle = this.color
-                context.strokeRect(this.boundingBox.left + canvas.width/2 - this.width/2, this.boundingBox.top + canvas.height/2 - this.heigth/2, this.width, this.heigth)
+                if(this.id == player.id){
+                    context.strokeStyle = this.color
+                    context.strokeRect(canvas.width/2 - this.width/2, canvas.height/2 - this.heigth/2, this.width, this.heigth)
+                }else{
+                    context.strokeStyle = this.color
+                    context.strokeRect(-player.position.x + this.position.x + canvas.width/2 - this.width/2, -player.position.y + this.position.y + canvas.height/2 - this.heigth/2, this.width, this.heigth)
+                }
             }
 
             if(animation.frames <= 1){
@@ -225,38 +243,6 @@ window.onload = async () => {
         throw 'Game could not initialize'
     }
 
-    // socket.on('movingLeft', () => {
-    //     player.moving.left = true;
-    // })
-
-    // socket.on('stoppedMovingLeft', () => {
-    //     player.moving.left = false;
-    // })
-
-    // socket.on('movingUp', () => {
-    //     player.moving.up = true;
-    // })
-
-    // socket.on('stoppedMovingUp', () => {
-    //     player.moving.up = false;
-    // })
-
-    // socket.on('movingRight', () => {
-    //     player.moving.right = true;
-    // })
-
-    // socket.on('stoppedMovingRight', () => {
-    //     player.moving.right = false;
-    // })
-
-    // socket.on('movingDown', () => {
-    //     player.moving.down = true;
-    // })
-
-    // socket.on('stoppedMovingDown', () => {
-    //     player.moving.down = false;
-    // })
-
     socket.on('update', (onlinePlayers) => {
         requestAnimationFrame(() => {
             clearCanvas()
@@ -269,7 +255,13 @@ window.onload = async () => {
                 players[id].boundingBox = onlinePlayers[id].boundingBox
                 players[id].width = onlinePlayers[id].width
                 players[id].heigth = onlinePlayers[id].heigth
-                // console.log('UPDATE left:', players[id].moving.left, 'right', players[id].moving.right)
+                if(id == player.id){
+                    player.position = onlinePlayers[id].position
+                    player.moving = onlinePlayers[id].moving
+                    player.boundingBox = onlinePlayers[id].boundingBox
+                    player.width = onlinePlayers[id].width
+                    player.heigth = onlinePlayers[id].heigth
+                }
 
                 if(!players[id].moving.left &&
                     !players[id].moving.left &&
@@ -339,13 +331,13 @@ window.onload = async () => {
             break;
 
             case 49: // Show Bounding Boxes
-                if(!showBoundingBoxes){
-                    showBoundingBoxes = true
-                    console.log('Show bounding boxes:', showBoundingBoxes)
-                }else{
-                    showBoundingBoxes = false
-                    console.log('Show bounding boxes:', showBoundingBoxes)
-                }
+                showBoundingBoxes = !showBoundingBoxes ? true : false
+                console.log('Show bounding boxes:', showBoundingBoxes)
+            break;
+
+            case 50: // Show Bounding Boxes
+                showAxisGuidelines = !showAxisGuidelines ? true : false
+                console.log('Show axis guidelines:', showBoundingBoxes)
             break;
         }
     })
@@ -376,20 +368,24 @@ window.onload = async () => {
     }
 
     function drawTilemap(){
-        context.drawImage(tilemap, 0, 0)
+        context.drawImage(tilemap, -player.position.x, -player.position.y)
     }
 
     function drawAxis(){
+        if(!showAxisGuidelines){
+            return
+        }
+
         context.beginPath()
-        context.strokeStyle = '#FF0000AA'
-        context.moveTo(canvas.width/2, 0)
-        context.lineTo(canvas.width/2, canvas.height)
+        context.strokeStyle = '#FF0000CC'
+        context.moveTo(-player.position.x + canvas.width/2, -player.position.y - 1000)
+        context.lineTo(-player.position.x + canvas.width/2, -player.position.y + canvas.height + 1000)
         context.stroke()
         
         context.beginPath()
-        context.strokeStyle = '#00FF00AA'
-        context.moveTo(0, canvas.height/2)
-        context.lineTo(canvas.width, canvas.height/2)
+        context.strokeStyle = '#00FF00CC'
+        context.moveTo(-player.position.x - 1000, -player.position.y + canvas.height/2)
+        context.lineTo(-player.position.x + canvas.width + 1000, -player.position.y + canvas.height/2)
         context.stroke()
     }
 }

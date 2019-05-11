@@ -91,56 +91,48 @@ server.on('connection', (socket) => {
     socket.on('moveLeft', () => {
         if(!player.moving.left){
             player.moving.left = true
-            // socket.emit('movingLeft')
         }
     })
 
     socket.on('stopMovingLeft', () => {
         // if(player.moving.left){
             player.moving.left = false
-            // socket.emit('stoppedMovingLeft')
         // }
     })
 
     socket.on('moveUp', () => {
         if(!player.moving.up){
             player.moving.up = true
-            // socket.emit('movingUp')
         }
     })
 
     socket.on('stopMovingUp', () => {
         // if(player.moving.up){
             player.moving.up = false
-            // socket.emit('stoppedMovingUp')
         // }
     })
 
     socket.on('moveRight', () => {
         if(!player.moving.right){
             player.moving.right = true
-            // socket.emit('movingRight')
         }
     })
 
     socket.on('stopMovingRight', () => {
         // if(player.moving.right){
             player.moving.right = false
-            // socket.emit('stoppedMovingRight')
         // }
     })
 
     socket.on('moveDown', () => {
         if(!player.moving.down){
             player.moving.down = true
-            // socket.emit('movingDown')
         }
     })
 
     socket.on('stopMovingDown', () => {
         // if(player.moving.down){
             player.moving.down = false
-            // socket.emit('stoppedMovingDown')
         // }
     })
 
@@ -161,9 +153,11 @@ let framesToSkip = 0
 let skippedFrames = 0
 let timedFrame = 0
 
+let frameCap = 60
+
 function loop(){
     if((endTime - startTime) >= 1000) {
-        framesToSkip = frame/30
+        framesToSkip = frame/frameCap
 
         startTime = Date.now()
         frame = 0
@@ -172,7 +166,7 @@ function loop(){
     if((skippedFrames >= framesToSkip) && framesToSkip > 0){
         timedFrame++
         
-        if(timedFrame >= 60){
+        if(timedFrame >= frameCap){
             timedFrame = 0
         }
         
