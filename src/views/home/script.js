@@ -368,7 +368,7 @@ window.onload = async () => {
     }
 
     function drawTilemap(){
-        context.drawImage(tilemap, -player.position.x, -player.position.y)
+        context.drawImage(tilemap, -player.position.x - tilemap.width/2 + canvas.width/2, -player.position.y - tilemap.height/2 + canvas.height/2)
     }
 
     function drawAxis(){
