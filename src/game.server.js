@@ -148,16 +148,15 @@ let startTime = Date.now()
 let endTime = Date.now()
 let frame = 0
 let onlinePlayers = {}
-let framesPersSecond = 0
 let framesToSkip = 0
 let skippedFrames = 0
 let timedFrame = 0
 
-let frameCap = 60
+let framesPersSecond = 60
 
 function loop(){
     if((endTime - startTime) >= 1000) {
-        framesToSkip = frame/frameCap
+        framesToSkip = frame/framesPersSecond
 
         startTime = Date.now()
         frame = 0
@@ -166,11 +165,11 @@ function loop(){
     if((skippedFrames >= framesToSkip) && framesToSkip > 0){
         timedFrame++
         
-        if(timedFrame >= frameCap){
+        if(timedFrame >= framesPersSecond){
             timedFrame = 0
         }
-        
         skippedFrames = 0
+        console.log()
         gameLoop(timedFrame)
     }
 
@@ -193,12 +192,17 @@ function testCollision(a, b){
 
     // console.log(a.moving, b.moving)
 
+    a.boundingBox.left = a.position.x
+    a.boundingBox.top = a.position.y
+    a.boundingBox.right = a.position.x + a.width
+    a.boundingBox.bottom = a.position.y + a.heigth
+
     if(
         a.boundingBox.top >= b.boundingBox.top &&
         a.boundingBox.top <= b.boundingBox.bottom &&
         a.boundingBox.left >= b.boundingBox.left &&
         a.boundingBox.left <= b.boundingBox.right){
-            console.log('Top-Left Collides')
+            // console.log('Top-Left Collides')
             return true
     }
     if(
@@ -206,7 +210,7 @@ function testCollision(a, b){
         a.boundingBox.top <= b.boundingBox.bottom &&
         a.boundingBox.right >= b.boundingBox.left &&
         a.boundingBox.right <= b.boundingBox.right){
-            console.log('Top-Right Collides')
+            // console.log('Top-Right Collides')
             return true
     }
     if(
@@ -214,7 +218,7 @@ function testCollision(a, b){
         a.boundingBox.bottom <= b.boundingBox.bottom &&
         a.boundingBox.right >= b.boundingBox.left &&
         a.boundingBox.right <= b.boundingBox.right){
-            console.log('Bottom-Right Collides')
+            // console.log('Bottom-Right Collides')
             return true
     }
     if(
@@ -222,7 +226,7 @@ function testCollision(a, b){
         a.boundingBox.bottom <= b.boundingBox.bottom &&
         a.boundingBox.left >= b.boundingBox.left &&
         a.boundingBox.left <= b.boundingBox.right){
-            console.log('Bottom-Left Collides')
+            // console.log('Bottom-Left Collides')
             return true
     }
 
@@ -238,39 +242,15 @@ function gameLoop(currentFrame){
         if(players[id].moving.left && players[id].moving.up){
             players[id].position.x -=  players[id].speed
             players[id].position.y -= players[id].speed
-            // players[id].moving = {
-            //     left: true,
-            //     up: true,
-            //     right: false,
-            //     down: false
-            // }
         }else if(players[id].moving.up && players[id].moving.right){
             players[id].position.x += players[id].speed
             players[id].position.y -= players[id].speed
-            // players[id].moving = {
-            //     left: false,
-            //     up: true,
-            //     right: true,
-            //     down: false
-            // }
         }else if(players[id].moving.right && players[id].moving.down){
             players[id].position.x += players[id].speed
             players[id].position.y += players[id].speed
-            // players[id].moving = {
-            //     left: false,
-            //     up: true,
-            //     right: true,
-            //     down: false
-            // }
         }else if(players[id].moving.down && players[id].moving.left){
             players[id].position.x -= players[id].speed
             players[id].position.y += players[id].speed
-            // players[id].moving = {
-            //     left: false,
-            //     up: true,
-            //     right: true,
-            //     down: false
-            // }
         }else if(players[id].moving.left){
             players[id].position.x -= players[id].speed
         }else if(players[id].moving.up){
@@ -281,9 +261,39 @@ function gameLoop(currentFrame){
             players[id].position.y += players[id].speed
         }
 
-        idPlayerIndexCollisionTested++
-        Object.keys(players).slice(idPlayerIndexCollisionTested).some((id2) => {
+        Object.keys(players).forEach((id2) => {
+            if(id == id2){
+                return
+            }
             let collides = testCollision(players[id], players[id2])
+            if(collides && !players[id].stuck){
+                // If it colides, then get it back to its last position
+                // Now check against the same object if it is still colliding, if it is, then it is stuck,
+                // disable collision until he is not colliding
+
+                console.log(`${id} Collides`)
+                console.log(`${id} Last Position: `, players[id].lastPosition)
+                console.log(`${id} Current Position: `, players[id].position)
+
+                players[id].position.x = players[id].lastPosition.x
+                players[id].position.y = players[id].lastPosition.y
+                console.log(`${id} Fixed position: `, players[id].position)
+
+                players[id].boundingBox.left = players[id].position.x
+                players[id].boundingBox.top = players[id].position.y
+                players[id].boundingBox.right = players[id].position.x + players[id].width
+                players[id].boundingBox.bottom = players[id].position.y + players[id].heigth
+
+                let collides = testCollision(players[id], players[id2])
+                if(collides){
+                    players[id].stuck = true
+                    console.log(`Player ${id} got stuck`)
+                }
+            }else if(!collides){
+                // If player was stuck but is not colliding anymore, then he is not stuck anymore
+                players[id].stuck = false
+            }
+
             // console.log('Stuck?: ', players[id].stuck)
 
             // if(collides && !players[id].stuck){
