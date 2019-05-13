@@ -169,7 +169,6 @@ function loop(){
             timedFrame = 0
         }
         skippedFrames = 0
-        console.log()
         gameLoop(timedFrame)
     }
 
@@ -183,7 +182,7 @@ function loop(){
 setImmediate(loop)
 
 function testCollision(a, b){
-    // console.log(a.boundingBox, b.boundingBox)
+    // console.log(boundingBox, b.boundingBox)
     /*  Collision most be based on diretion the object is moving, it can't
     *   collide in its bottom if its heading top, another object can reach him from the bottom
     *   while it is heading top, but that does not mean it can not move top, the other object
@@ -192,45 +191,155 @@ function testCollision(a, b){
 
     // console.log(a.moving, b.moving)
 
-    a.boundingBox.left = a.position.x
-    a.boundingBox.top = a.position.y
-    a.boundingBox.right = a.position.x + a.width
-    a.boundingBox.bottom = a.position.y + a.heigth
+    // boundingBox.left = a.position.x
+    // boundingBox.top = a.position.y
+    // boundingBox.right = a.position.x + a.width
+    // boundingBox.bottom = a.position.y + a.heigth
+
+    let boundingBox = {}
+
+    // First check colision on x axis
+    boundingBox.left = a.position.x
+    boundingBox.top = a.lastPosition.y
+    boundingBox.right = a.position.x + a.width
+    boundingBox.bottom = a.lastPosition.y + a.heigth
+
+    let collides = {
+        x: false,
+        y: false
+    }
 
     if(
-        a.boundingBox.top >= b.boundingBox.top &&
-        a.boundingBox.top <= b.boundingBox.bottom &&
-        a.boundingBox.left >= b.boundingBox.left &&
-        a.boundingBox.left <= b.boundingBox.right){
+        boundingBox.top >= b.boundingBox.top &&
+        boundingBox.top <= b.boundingBox.bottom &&
+        boundingBox.left >= b.boundingBox.left &&
+        boundingBox.left <= b.boundingBox.right){
             // console.log('Top-Left Collides')
-            return true
+            // return true
+            collides.x = true
     }
     if(
-        a.boundingBox.top >= b.boundingBox.top &&
-        a.boundingBox.top <= b.boundingBox.bottom &&
-        a.boundingBox.right >= b.boundingBox.left &&
-        a.boundingBox.right <= b.boundingBox.right){
+        boundingBox.top >= b.boundingBox.top &&
+        boundingBox.top <= b.boundingBox.bottom &&
+        boundingBox.right >= b.boundingBox.left &&
+        boundingBox.right <= b.boundingBox.right){
             // console.log('Top-Right Collides')
-            return true
+            // return true
+            collides.x = true
     }
     if(
-        a.boundingBox.bottom >= b.boundingBox.top &&
-        a.boundingBox.bottom <= b.boundingBox.bottom &&
-        a.boundingBox.right >= b.boundingBox.left &&
-        a.boundingBox.right <= b.boundingBox.right){
+        boundingBox.bottom >= b.boundingBox.top &&
+        boundingBox.bottom <= b.boundingBox.bottom &&
+        boundingBox.right >= b.boundingBox.left &&
+        boundingBox.right <= b.boundingBox.right){
             // console.log('Bottom-Right Collides')
-            return true
+            // return true
+            collides.x = true
     }
     if(
-        a.boundingBox.bottom >= b.boundingBox.top &&
-        a.boundingBox.bottom <= b.boundingBox.bottom &&
-        a.boundingBox.left >= b.boundingBox.left &&
-        a.boundingBox.left <= b.boundingBox.right){
+        boundingBox.bottom >= b.boundingBox.top &&
+        boundingBox.bottom <= b.boundingBox.bottom &&
+        boundingBox.left >= b.boundingBox.left &&
+        boundingBox.left <= b.boundingBox.right){
             // console.log('Bottom-Left Collides')
-            return true
+            // return true
+            collides.x = true
     }
 
-    return false    
+    // Now check on y axis
+    boundingBox.left = a.lastPosition.x
+    boundingBox.top = a.position.y
+    boundingBox.right = a.lastPosition.x + a.width
+    boundingBox.bottom = a.position.y + a.heigth
+
+    if(
+        boundingBox.top >= b.boundingBox.top &&
+        boundingBox.top <= b.boundingBox.bottom &&
+        boundingBox.left >= b.boundingBox.left &&
+        boundingBox.left <= b.boundingBox.right){
+            // console.log('Top-Left Collides')
+            // return true
+            collides.y = true
+    }
+    if(
+        boundingBox.top >= b.boundingBox.top &&
+        boundingBox.top <= b.boundingBox.bottom &&
+        boundingBox.right >= b.boundingBox.left &&
+        boundingBox.right <= b.boundingBox.right){
+            // console.log('Top-Right Collides')
+            // return true
+            collides.y = true
+    }
+    if(
+        boundingBox.bottom >= b.boundingBox.top &&
+        boundingBox.bottom <= b.boundingBox.bottom &&
+        boundingBox.right >= b.boundingBox.left &&
+        boundingBox.right <= b.boundingBox.right){
+            // console.log('Bottom-Right Collides')
+            // return true
+            collides.y = true
+    }
+    if(
+        boundingBox.bottom >= b.boundingBox.top &&
+        boundingBox.bottom <= b.boundingBox.bottom &&
+        boundingBox.left >= b.boundingBox.left &&
+        boundingBox.left <= b.boundingBox.right){
+            // console.log('Bottom-Left Collides')
+            // return true
+            collides.y = true
+    }
+
+    // If it does not collide on both axis, check if it s a corner then
+
+    if(!collides.x && !collides.y){
+        boundingBox.left = a.position.x
+        boundingBox.top = a.position.y
+        boundingBox.right = a.position.x + a.width
+        boundingBox.bottom = a.position.y + a.heigth
+    
+        if(
+            boundingBox.top >= b.boundingBox.top &&
+            boundingBox.top <= b.boundingBox.bottom &&
+            boundingBox.left >= b.boundingBox.left &&
+            boundingBox.left <= b.boundingBox.right){
+                // console.log('Top-Left Collides')
+                // return true
+                collides.x = true
+                collides.y = true
+        }
+        if(
+            boundingBox.top >= b.boundingBox.top &&
+            boundingBox.top <= b.boundingBox.bottom &&
+            boundingBox.right >= b.boundingBox.left &&
+            boundingBox.right <= b.boundingBox.right){
+                // console.log('Top-Right Collides')
+                // return true
+                collides.x = true
+                collides.y = true
+        }
+        if(
+            boundingBox.bottom >= b.boundingBox.top &&
+            boundingBox.bottom <= b.boundingBox.bottom &&
+            boundingBox.right >= b.boundingBox.left &&
+            boundingBox.right <= b.boundingBox.right){
+                // console.log('Bottom-Right Collides')
+                // return true
+                collides.x = true
+                collides.y = true
+        }
+        if(
+            boundingBox.bottom >= b.boundingBox.top &&
+            boundingBox.bottom <= b.boundingBox.bottom &&
+            boundingBox.left >= b.boundingBox.left &&
+            boundingBox.left <= b.boundingBox.right){
+                // console.log('Bottom-Left Collides')
+                // return true
+                collides.x = true
+                collides.y = true
+        }
+    }
+
+    return collides
 }
 
 let idPlayerIndexCollisionTested = 0
@@ -266,30 +375,30 @@ function gameLoop(currentFrame){
                 return
             }
             let collides = testCollision(players[id], players[id2])
-            if(collides && !players[id].stuck){
+            if((collides.x || collides.y) && !players[id].stuck){
                 // If it colides, then get it back to its last position
                 // Now check against the same object if it is still colliding, if it is, then it is stuck,
                 // disable collision until he is not colliding
+                console.log(collides)
 
                 console.log(`${id} Collides`)
                 console.log(`${id} Last Position: `, players[id].lastPosition)
                 console.log(`${id} Current Position: `, players[id].position)
 
-                players[id].position.x = players[id].lastPosition.x
-                players[id].position.y = players[id].lastPosition.y
+                if(collides.x){
+                    players[id].position.x = players[id].lastPosition.x
+                }
+                if(collides.y){
+                    players[id].position.y = players[id].lastPosition.y
+                }
                 console.log(`${id} Fixed position: `, players[id].position)
 
-                players[id].boundingBox.left = players[id].position.x
-                players[id].boundingBox.top = players[id].position.y
-                players[id].boundingBox.right = players[id].position.x + players[id].width
-                players[id].boundingBox.bottom = players[id].position.y + players[id].heigth
-
-                let collides = testCollision(players[id], players[id2])
-                if(collides){
+                let stillColliding = testCollision(players[id], players[id2])
+                if(stillColliding.x || stillColliding.y){
                     players[id].stuck = true
                     console.log(`Player ${id} got stuck`)
                 }
-            }else if(!collides){
+            }else if(!collides.x && !collides.y){
                 // If player was stuck but is not colliding anymore, then he is not stuck anymore
                 players[id].stuck = false
             }
@@ -326,7 +435,6 @@ function gameLoop(currentFrame){
     })
 
     idPlayerIndexCollisionTested = 0
-    // console.log()
 
     server.emit('update', onlinePlayers)
 }
