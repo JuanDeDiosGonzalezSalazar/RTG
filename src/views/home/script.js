@@ -21,7 +21,7 @@ window.onload = async () => {
         resolve(false)
     })
 
-    if(!imageLoaded){
+    if (!imageLoaded) {
         throw 'Image could not be loaded'
     }
 
@@ -35,16 +35,16 @@ window.onload = async () => {
         resolve(false)
     })
 
-    if(!imageLoaded){
+    if (!imageLoaded) {
         throw 'Player sprite animation could not be loaded...'
     }
 
     const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-    window.webkitRequestAnimationFrame || window.msRequestAnimationFrame; 
-    
+        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
     window.requestAnimationFrame = requestAnimationFrame;
 
-    const socket = io(`${server}:5000`, {autoConnect: true})
+    const socket = io(`${server}:5000`, { autoConnect: true })
     let connected = await new Promise((resolve, reject) => {
         socket.on('connect', () => {
             resolve(true)
@@ -55,8 +55,8 @@ window.onload = async () => {
 
     console.log('Connected')
 
-    class Player{
-        constructor(id, position, width, heigth, boundingBox, color, moving = {left: false, up: false, right: false, down: false}){
+    class Player {
+        constructor(id, position, width, heigth, boundingBox, color, moving = { left: false, up: false, right: false, down: false }) {
             this.id = id
             this.position = position
             this.moving = moving
@@ -159,54 +159,54 @@ window.onload = async () => {
             }
         }
 
-        draw(){
+        draw() {
             let animation = this.animations[this.currentAnimation]
 
-            if(this.id == player.id){
+            if (this.id == player.id) {
                 context.drawImage(playerSprite,
                     animation.x + (animation.currentFrame * animation.width),
                     animation.y,
                     animation.width,
                     animation.height,
-                    canvas.width/2 - this.width/2,
-                    canvas.height/2 - this.heigth/2,
+                    canvas.width / 2 - this.width / 2,
+                    canvas.height / 2 - this.heigth / 2,
                     this.width,
                     this.heigth)
-            }else{
+            } else {
                 context.drawImage(playerSprite,
                     animation.x + (animation.currentFrame * animation.width),
                     animation.y,
                     animation.width,
                     animation.height,
-                    -player.position.x + this.position.x + canvas.width/2 - this.width/2,
-                    -player.position.y + this.position.y + canvas.height/2 - this.heigth/2,
+                    -player.position.x + this.position.x + canvas.width / 2 - this.width / 2,
+                    -player.position.y + this.position.y + canvas.height / 2 - this.heigth / 2,
                     this.width,
                     this.heigth)
             }
 
-            if(showBoundingBoxes){
-                if(this.id == player.id){
+            if (showBoundingBoxes) {
+                if (this.id == player.id) {
                     context.strokeStyle = this.color
-                    context.strokeRect(canvas.width/2 - this.width/2, canvas.height/2 - this.heigth/2, this.width, this.heigth)
-                }else{
+                    context.strokeRect(canvas.width / 2 - this.width / 2, canvas.height / 2 - this.heigth / 2, this.width, this.heigth)
+                } else {
                     context.strokeStyle = this.color
-                    context.strokeRect(-player.position.x + this.position.x + canvas.width/2 - this.width/2, -player.position.y + this.position.y + canvas.height/2 - this.heigth/2, this.width, this.heigth)
+                    context.strokeRect(-player.position.x + this.position.x + canvas.width / 2 - this.width / 2, -player.position.y + this.position.y + canvas.height / 2 - this.heigth / 2, this.width, this.heigth)
                 }
             }
 
-            if(animation.frames <= 1){
+            if (animation.frames <= 1) {
                 return
             }
 
-            if(animation.skippedFrames < animation.framesToSkip){
+            if (animation.skippedFrames < animation.framesToSkip) {
                 animation.skippedFrames++
-            }else{
+            } else {
                 animation.skippedFrames = 0
             }
 
-            if(!animation.skippedFrames && (animation.currentFrame < animation.frames - 1)){
+            if (!animation.skippedFrames && (animation.currentFrame < animation.frames - 1)) {
                 animation.currentFrame++
-            }else if(animation.currentFrame >= animation.frames - 1){
+            } else if (animation.currentFrame >= animation.frames - 1) {
                 animation.currentFrame = 0
             }
         }
@@ -216,18 +216,18 @@ window.onload = async () => {
     let players = {}
 
     let gameInitialized = await new Promise((resolve, reject) => {
-        socket.on('welcome', (serverStatus) => {        
+        socket.on('welcome', (serverStatus) => {
             player = new Player(serverStatus.myStatus.id, serverStatus.myStatus.position, serverStatus.myStatus.width, serverStatus.myStatus.height, serverStatus.myStatus.boundingBox, serverStatus.myStatus.color, serverStatus.myStatus.moving)
-    
+
             requestAnimationFrame(() => {
                 clearCanvas()
                 drawTilemap()
-    
+
                 players = {}
                 Object.keys(serverStatus.onlinePlayers).forEach((id) => {
                     let player = serverStatus.onlinePlayers[id]
                     let onlinePlayer = new Player(player.id, player.position, player.width, player.height, player.boundingBox, player.color, player.moving)
-    
+
                     players[id] = onlinePlayer
                     onlinePlayer.draw(onlinePlayer)
                 })
@@ -239,168 +239,158 @@ window.onload = async () => {
         resolve(false)
     })
 
-    if(!gameInitialized){
+    if (!gameInitialized) {
         throw 'Game could not initialize'
     }
 
     socket.on('update', (onlinePlayers) => {
-        // requestAnimationFrame(() => {
-            Object.keys(players).forEach((id) => {
-                players[id].position = onlinePlayers[id].position
-                players[id].moving = onlinePlayers[id].moving
-                players[id].boundingBox = onlinePlayers[id].boundingBox
-                players[id].width = onlinePlayers[id].width
-                players[id].heigth = onlinePlayers[id].heigth
-                if(id == player.id){
-                    player.position = onlinePlayers[id].position
-                    player.moving = onlinePlayers[id].moving
-                    player.boundingBox = onlinePlayers[id].boundingBox
-                    player.width = onlinePlayers[id].width
-                    player.heigth = onlinePlayers[id].heigth
-                }
-
-                if(!players[id].moving.left &&
-                    !players[id].moving.left &&
-                    !players[id].moving.left &&
-                    !players[id].moving.left){
-                        players[id].currentAnimation = 'stand'
-                    }
-                
-                if(players[id].moving.left && players[id].moving.up){
-                    players[id].currentAnimation = 'leftUp'
-                }else if(players[id].moving.up && players[id].moving.right){
-                    players[id].currentAnimation = 'rightUp'
-                }else if(players[id].moving.right && players[id].moving.down){
-                    players[id].currentAnimation = 'rightDown'
-                }else if(players[id].moving.down && players[id].moving.left){
-                    players[id].currentAnimation = 'leftDown'
-                }else if(players[id].moving.left){
-                    players[id].currentAnimation = 'left'
-                }else if(players[id].moving.up){
-                    players[id].currentAnimation = 'up'
-                }else if(players[id].moving.right){
-                    players[id].currentAnimation = 'right'
-                }else if(players[id].moving.down){
-                    players[id].currentAnimation = 'down'
-                }
-            })
-        // })
-    })
-
-    function gameLoop(){
         clearCanvas()
         drawTilemap()
         drawAxis()
-        
+
         Object.keys(players).forEach((id) => {
+            players[id].position = onlinePlayers[id].position
+            players[id].moving = onlinePlayers[id].moving
+            players[id].boundingBox = onlinePlayers[id].boundingBox
+            players[id].width = onlinePlayers[id].width
+            players[id].heigth = onlinePlayers[id].heigth
+            if (id == player.id) {
+                player.position = onlinePlayers[id].position
+                player.moving = onlinePlayers[id].moving
+                player.boundingBox = onlinePlayers[id].boundingBox
+                player.width = onlinePlayers[id].width
+                player.heigth = onlinePlayers[id].heigth
+            }
+
+            if (!players[id].moving.left &&
+                !players[id].moving.left &&
+                !players[id].moving.left &&
+                !players[id].moving.left) {
+                players[id].currentAnimation = 'stand'
+            }
+
+            if (players[id].moving.left && players[id].moving.up) {
+                players[id].currentAnimation = 'leftUp'
+            } else if (players[id].moving.up && players[id].moving.right) {
+                players[id].currentAnimation = 'rightUp'
+            } else if (players[id].moving.right && players[id].moving.down) {
+                players[id].currentAnimation = 'rightDown'
+            } else if (players[id].moving.down && players[id].moving.left) {
+                players[id].currentAnimation = 'leftDown'
+            } else if (players[id].moving.left) {
+                players[id].currentAnimation = 'left'
+            } else if (players[id].moving.up) {
+                players[id].currentAnimation = 'up'
+            } else if (players[id].moving.right) {
+                players[id].currentAnimation = 'right'
+            } else if (players[id].moving.down) {
+                players[id].currentAnimation = 'down'
+            }
+
             players[id].draw()
         })
-
-        requestAnimationFrame(gameLoop)
-    }
-
-    requestAnimationFrame(gameLoop)
+    })
 
     socket.on('newPlayer', (player) => {
         players[player.id] = new Player(player.id, player.position, player.width, player.height, player.boundingBox, player.color, player.moving)
     })
 
     socket.on('playerLeft', (id) => {
-        if(players[id]){
+        if (players[id]) {
             delete players[id]
         }
     })
 
     window.addEventListener('keydown', (e) => {
         // console.log('left:', player.moving.left, 'right:', player.moving.right)
-        switch(e.keyCode){
+        switch (e.keyCode) {
             case 37: // Left
-                if(!player.moving.left){
+                if (!player.moving.left) {
                     socket.emit('moveLeft')
                 }
-            break;
+                break;
 
             case 38: // Up
-                if(!player.moving.up){
+                if (!player.moving.up) {
                     socket.emit('moveUp')
                 }
-            break;
+                break;
 
             case 39: // Right
-                if(!player.moving.right){
+                if (!player.moving.right) {
                     socket.emit('moveRight')
                 }
-            break;
+                break;
 
             case 40: // Down
-                if(!player.moving.down){
+                if (!player.moving.down) {
                     socket.emit('moveDown')
                 }
-            break;
+                break;
 
             case 49: // Show Bounding Boxes
                 showBoundingBoxes = !showBoundingBoxes ? true : false
                 console.log('Show bounding boxes:', showBoundingBoxes)
-            break;
+                break;
 
             case 50: // Show Bounding Boxes
                 showAxisGuidelines = !showAxisGuidelines ? true : false
                 console.log('Show axis guidelines:', showBoundingBoxes)
-            break;
+                break;
         }
     })
 
     window.addEventListener('keyup', (e) => {
-        switch(e.keyCode){
+        switch (e.keyCode) {
             case 37: // Left
                 socket.emit('stopMovingLeft')
-            break;
+                break;
 
             case 38: // Up
                 socket.emit('stopMovingUp')
-            break;
+                break;
 
             case 39: // Right
                 socket.emit('stopMovingRight')
-            break;
+                break;
 
             case 40: // Down
                 socket.emit('stopMovingDown')
-            break;
+                break;
         }
     })
 
-    function clearCanvas(){
+    function clearCanvas() {
         context.fillStyle = '#FFFFFF'
         context.fillRect(0, 0, canvas.width, canvas.height)
     }
 
-    function drawTilemap(){
-        context.drawImage(tilemap, -player.position.x - tilemap.width/2 + canvas.width/2, -player.position.y - tilemap.height/2 + canvas.height/2)
+    function drawTilemap() {
+        context.drawImage(tilemap, -player.position.x - tilemap.width / 2 + canvas.width / 2, -player.position.y - tilemap.height / 2 + canvas.height / 2)
     }
 
-    function drawAxis(){
-        if(!showAxisGuidelines){
+    function drawAxis() {
+        if (!showAxisGuidelines) {
             return
         }
 
         context.beginPath()
         context.strokeStyle = '#FF0000CC'
-        context.moveTo(-player.position.x + canvas.width/2, -player.position.y - 1000)
-        context.lineTo(-player.position.x + canvas.width/2, -player.position.y + canvas.height + 1000)
+        context.moveTo(-player.position.x + canvas.width / 2, -player.position.y - 1000)
+        context.lineTo(-player.position.x + canvas.width / 2, -player.position.y + canvas.height + 1000)
         context.stroke()
-        
+
         context.beginPath()
         context.strokeStyle = '#00FF00CC'
-        context.moveTo(-player.position.x - 1000, -player.position.y + canvas.height/2)
-        context.lineTo(-player.position.x + canvas.width + 1000, -player.position.y + canvas.height/2)
+        context.moveTo(-player.position.x - 1000, -player.position.y + canvas.height / 2)
+        context.lineTo(-player.position.x + canvas.width + 1000, -player.position.y + canvas.height / 2)
         context.stroke()
     }
 
-    function fullscreen(){
+    function fullscreen() {
         let canvas = document.getElementById('canvas');
 
-        if(canvas.webkitRequestFullScreen) {
+        if (canvas.webkitRequestFullScreen) {
             canvas.webkitRequestFullScreen();
         }
         else {
@@ -409,5 +399,5 @@ window.onload = async () => {
     }
 
     let buttonFullScreen = document.getElementById('buttonFullScreen')
-    buttonFullScreen.addEventListener("click",fullscreen)
+    buttonFullScreen.addEventListener("click", fullscreen)
 }

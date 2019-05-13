@@ -2,8 +2,8 @@ const io = require('socket.io')
 const port = process.env.GAME_SERVER_PORT
 const server = io(5000)
 
-class Player{
-    constructor(id, socket, x, y){
+class Player {
+    constructor(id, socket, x, y) {
         this.id = id
         this.socket = socket
         this.position = {
@@ -35,7 +35,7 @@ class Player{
     }
 }
 
-function randomColor(){
+function randomColor() {
     return '#' + ('00000' + Math.round(Math.random() * 0x333333).toString(16)).substr(-6)
 }
 
@@ -53,7 +53,7 @@ server.on('connection', (socket) => {
     players[player.id] = player
 
     let onlinePlayers = {}
-    
+
     Object.keys(players).map((id) => {
         let player = players[id]
 
@@ -89,50 +89,50 @@ server.on('connection', (socket) => {
     socket.broadcast.emit('newPlayer', playerStatus)
 
     socket.on('moveLeft', () => {
-        if(!player.moving.left){
+        if (!player.moving.left) {
             player.moving.left = true
         }
     })
 
     socket.on('stopMovingLeft', () => {
         // if(player.moving.left){
-            player.moving.left = false
+        player.moving.left = false
         // }
     })
 
     socket.on('moveUp', () => {
-        if(!player.moving.up){
+        if (!player.moving.up) {
             player.moving.up = true
         }
     })
 
     socket.on('stopMovingUp', () => {
         // if(player.moving.up){
-            player.moving.up = false
+        player.moving.up = false
         // }
     })
 
     socket.on('moveRight', () => {
-        if(!player.moving.right){
+        if (!player.moving.right) {
             player.moving.right = true
         }
     })
 
     socket.on('stopMovingRight', () => {
         // if(player.moving.right){
-            player.moving.right = false
+        player.moving.right = false
         // }
     })
 
     socket.on('moveDown', () => {
-        if(!player.moving.down){
+        if (!player.moving.down) {
             player.moving.down = true
         }
     })
 
     socket.on('stopMovingDown', () => {
         // if(player.moving.down){
-            player.moving.down = false
+        player.moving.down = false
         // }
     })
 
@@ -154,18 +154,18 @@ let timedFrame = 0
 
 let framesPerSecond = 60
 
-function loop(){
-    if((endTime - startTime) >= 1000) {
-        framesToSkip = frame/framesPerSecond
+function loop() {
+    if ((endTime - startTime) >= 1000) {
+        framesToSkip = frame / framesPerSecond
 
         startTime = Date.now()
         frame = 0
     }
 
-    if((skippedFrames >= framesToSkip) && framesToSkip > 0){
+    if ((skippedFrames >= framesToSkip) && framesToSkip > 0) {
         timedFrame++
-        
-        if(timedFrame >= framesPerSecond){
+
+        if (timedFrame >= framesPerSecond) {
             timedFrame = 0
         }
         skippedFrames = 0
@@ -181,7 +181,7 @@ function loop(){
 
 setImmediate(loop)
 
-function testCollision(a, b){
+function testCollision(a, b) {
     // console.log(boundingBox, b.boundingBox)
     /*  Collision most be based on diretion the object is moving, it can't
     *   collide in its bottom if its heading top, another object can reach him from the bottom
@@ -209,41 +209,41 @@ function testCollision(a, b){
         y: false
     }
 
-    if(
+    if (
         boundingBox.top >= b.boundingBox.top &&
         boundingBox.top <= b.boundingBox.bottom &&
         boundingBox.left >= b.boundingBox.left &&
-        boundingBox.left <= b.boundingBox.right){
-            // console.log('Top-Left Collides')
-            // return true
-            collides.x = true
+        boundingBox.left <= b.boundingBox.right) {
+        // console.log('Top-Left Collides')
+        // return true
+        collides.x = true
     }
-    if(
+    if (
         boundingBox.top >= b.boundingBox.top &&
         boundingBox.top <= b.boundingBox.bottom &&
         boundingBox.right >= b.boundingBox.left &&
-        boundingBox.right <= b.boundingBox.right){
-            // console.log('Top-Right Collides')
-            // return true
-            collides.x = true
+        boundingBox.right <= b.boundingBox.right) {
+        // console.log('Top-Right Collides')
+        // return true
+        collides.x = true
     }
-    if(
+    if (
         boundingBox.bottom >= b.boundingBox.top &&
         boundingBox.bottom <= b.boundingBox.bottom &&
         boundingBox.right >= b.boundingBox.left &&
-        boundingBox.right <= b.boundingBox.right){
-            // console.log('Bottom-Right Collides')
-            // return true
-            collides.x = true
+        boundingBox.right <= b.boundingBox.right) {
+        // console.log('Bottom-Right Collides')
+        // return true
+        collides.x = true
     }
-    if(
+    if (
         boundingBox.bottom >= b.boundingBox.top &&
         boundingBox.bottom <= b.boundingBox.bottom &&
         boundingBox.left >= b.boundingBox.left &&
-        boundingBox.left <= b.boundingBox.right){
-            // console.log('Bottom-Left Collides')
-            // return true
-            collides.x = true
+        boundingBox.left <= b.boundingBox.right) {
+        // console.log('Bottom-Left Collides')
+        // return true
+        collides.x = true
     }
 
     // Now check on y axis
@@ -252,90 +252,90 @@ function testCollision(a, b){
     boundingBox.right = a.lastPosition.x + a.width
     boundingBox.bottom = a.position.y + a.heigth
 
-    if(
+    if (
         boundingBox.top >= b.boundingBox.top &&
         boundingBox.top <= b.boundingBox.bottom &&
         boundingBox.left >= b.boundingBox.left &&
-        boundingBox.left <= b.boundingBox.right){
-            // console.log('Top-Left Collides')
-            // return true
-            collides.y = true
+        boundingBox.left <= b.boundingBox.right) {
+        // console.log('Top-Left Collides')
+        // return true
+        collides.y = true
     }
-    if(
+    if (
         boundingBox.top >= b.boundingBox.top &&
         boundingBox.top <= b.boundingBox.bottom &&
         boundingBox.right >= b.boundingBox.left &&
-        boundingBox.right <= b.boundingBox.right){
-            // console.log('Top-Right Collides')
-            // return true
-            collides.y = true
+        boundingBox.right <= b.boundingBox.right) {
+        // console.log('Top-Right Collides')
+        // return true
+        collides.y = true
     }
-    if(
+    if (
         boundingBox.bottom >= b.boundingBox.top &&
         boundingBox.bottom <= b.boundingBox.bottom &&
         boundingBox.right >= b.boundingBox.left &&
-        boundingBox.right <= b.boundingBox.right){
-            // console.log('Bottom-Right Collides')
-            // return true
-            collides.y = true
+        boundingBox.right <= b.boundingBox.right) {
+        // console.log('Bottom-Right Collides')
+        // return true
+        collides.y = true
     }
-    if(
+    if (
         boundingBox.bottom >= b.boundingBox.top &&
         boundingBox.bottom <= b.boundingBox.bottom &&
         boundingBox.left >= b.boundingBox.left &&
-        boundingBox.left <= b.boundingBox.right){
-            // console.log('Bottom-Left Collides')
-            // return true
-            collides.y = true
+        boundingBox.left <= b.boundingBox.right) {
+        // console.log('Bottom-Left Collides')
+        // return true
+        collides.y = true
     }
 
     // If it does not collide on both axis, check if it s a corner then
 
-    if(!collides.x && !collides.y){
+    if (!collides.x && !collides.y) {
         boundingBox.left = a.position.x
         boundingBox.top = a.position.y
         boundingBox.right = a.position.x + a.width
         boundingBox.bottom = a.position.y + a.heigth
-    
-        if(
+
+        if (
             boundingBox.top >= b.boundingBox.top &&
             boundingBox.top <= b.boundingBox.bottom &&
             boundingBox.left >= b.boundingBox.left &&
-            boundingBox.left <= b.boundingBox.right){
-                // console.log('Top-Left Collides')
-                // return true
-                collides.x = true
-                collides.y = true
+            boundingBox.left <= b.boundingBox.right) {
+            // console.log('Top-Left Collides')
+            // return true
+            collides.x = true
+            collides.y = true
         }
-        if(
+        if (
             boundingBox.top >= b.boundingBox.top &&
             boundingBox.top <= b.boundingBox.bottom &&
             boundingBox.right >= b.boundingBox.left &&
-            boundingBox.right <= b.boundingBox.right){
-                // console.log('Top-Right Collides')
-                // return true
-                collides.x = true
-                collides.y = true
+            boundingBox.right <= b.boundingBox.right) {
+            // console.log('Top-Right Collides')
+            // return true
+            collides.x = true
+            collides.y = true
         }
-        if(
+        if (
             boundingBox.bottom >= b.boundingBox.top &&
             boundingBox.bottom <= b.boundingBox.bottom &&
             boundingBox.right >= b.boundingBox.left &&
-            boundingBox.right <= b.boundingBox.right){
-                // console.log('Bottom-Right Collides')
-                // return true
-                collides.x = true
-                collides.y = true
+            boundingBox.right <= b.boundingBox.right) {
+            // console.log('Bottom-Right Collides')
+            // return true
+            collides.x = true
+            collides.y = true
         }
-        if(
+        if (
             boundingBox.bottom >= b.boundingBox.top &&
             boundingBox.bottom <= b.boundingBox.bottom &&
             boundingBox.left >= b.boundingBox.left &&
-            boundingBox.left <= b.boundingBox.right){
-                // console.log('Bottom-Left Collides')
-                // return true
-                collides.x = true
-                collides.y = true
+            boundingBox.left <= b.boundingBox.right) {
+            // console.log('Bottom-Left Collides')
+            // return true
+            collides.x = true
+            collides.y = true
         }
     }
 
@@ -343,39 +343,39 @@ function testCollision(a, b){
 }
 
 let idPlayerIndexCollisionTested = 0
-function gameLoop(currentFrame){
+function gameLoop(currentFrame) {
     Object.keys(players).forEach((id) => {
         players[id].lastPosition.x = players[id].position.x
         players[id].lastPosition.y = players[id].position.y
 
-        if(players[id].moving.left && players[id].moving.up){
-            players[id].position.x -=  players[id].speed
+        if (players[id].moving.left && players[id].moving.up) {
+            players[id].position.x -= players[id].speed
             players[id].position.y -= players[id].speed
-        }else if(players[id].moving.up && players[id].moving.right){
+        } else if (players[id].moving.up && players[id].moving.right) {
             players[id].position.x += players[id].speed
             players[id].position.y -= players[id].speed
-        }else if(players[id].moving.right && players[id].moving.down){
+        } else if (players[id].moving.right && players[id].moving.down) {
             players[id].position.x += players[id].speed
             players[id].position.y += players[id].speed
-        }else if(players[id].moving.down && players[id].moving.left){
+        } else if (players[id].moving.down && players[id].moving.left) {
             players[id].position.x -= players[id].speed
             players[id].position.y += players[id].speed
-        }else if(players[id].moving.left){
+        } else if (players[id].moving.left) {
             players[id].position.x -= players[id].speed
-        }else if(players[id].moving.up){
+        } else if (players[id].moving.up) {
             players[id].position.y -= players[id].speed
-        }else if(players[id].moving.right){
+        } else if (players[id].moving.right) {
             players[id].position.x += players[id].speed
-        }else if(players[id].moving.down){
+        } else if (players[id].moving.down) {
             players[id].position.y += players[id].speed
         }
 
         Object.keys(players).forEach((id2) => {
-            if(id == id2){
+            if (id == id2) {
                 return
             }
             let collides = testCollision(players[id], players[id2])
-            if((collides.x || collides.y) && !players[id].stuck){
+            if ((collides.x || collides.y) && !players[id].stuck) {
                 // If it colides, then get it back to its last position
                 // Now check against the same object if it is still colliding, if it is, then it is stuck,
                 // disable collision until he is not colliding
@@ -385,20 +385,20 @@ function gameLoop(currentFrame){
                 console.log(`${id} Last Position: `, players[id].lastPosition)
                 console.log(`${id} Current Position: `, players[id].position)
 
-                if(collides.x){
+                if (collides.x) {
                     players[id].position.x = players[id].lastPosition.x
                 }
-                if(collides.y){
+                if (collides.y) {
                     players[id].position.y = players[id].lastPosition.y
                 }
                 console.log(`${id} Fixed position: `, players[id].position)
 
                 let stillColliding = testCollision(players[id], players[id2])
-                if(stillColliding.x || stillColliding.y){
+                if (stillColliding.x || stillColliding.y) {
                     players[id].stuck = true
                     console.log(`Player ${id} got stuck`)
                 }
-            }else if(!collides.x && !collides.y){
+            } else if (!collides.x && !collides.y) {
                 // If player was stuck but is not colliding anymore, then he is not stuck anymore
                 players[id].stuck = false
             }
