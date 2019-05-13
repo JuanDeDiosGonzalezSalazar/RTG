@@ -170,8 +170,8 @@ window.onload = async () => {
                     animation.height,
                     canvas.width/2 - this.width/2,
                     canvas.height/2 - this.heigth/2,
-                    64,
-                    64)
+                    this.width,
+                    this.heigth)
             }else{
                 context.drawImage(playerSprite,
                     animation.x + (animation.currentFrame * animation.width),
@@ -180,8 +180,8 @@ window.onload = async () => {
                     animation.height,
                     -player.position.x + this.position.x + canvas.width/2 - this.width/2,
                     -player.position.y + this.position.y + canvas.height/2 - this.heigth/2,
-                    64,
-                    64)
+                    this.width,
+                    this.heigth)
             }
 
             if(showBoundingBoxes){
@@ -244,11 +244,7 @@ window.onload = async () => {
     }
 
     socket.on('update', (onlinePlayers) => {
-        requestAnimationFrame(() => {
-            clearCanvas()
-            drawTilemap()
-            drawAxis()
-
+        // requestAnimationFrame(() => {
             Object.keys(players).forEach((id) => {
                 players[id].position = onlinePlayers[id].position
                 players[id].moving = onlinePlayers[id].moving
@@ -287,11 +283,23 @@ window.onload = async () => {
                 }else if(players[id].moving.down){
                     players[id].currentAnimation = 'down'
                 }
-
-                players[id].draw()
             })
-        })
+        // })
     })
+
+    function gameLoop(){
+        clearCanvas()
+        drawTilemap()
+        drawAxis()
+        
+        Object.keys(players).forEach((id) => {
+            players[id].draw()
+        })
+
+        requestAnimationFrame(gameLoop)
+    }
+
+    requestAnimationFrame(gameLoop)
 
     socket.on('newPlayer', (player) => {
         players[player.id] = new Player(player.id, player.position, player.width, player.height, player.boundingBox, player.color, player.moving)
@@ -388,4 +396,18 @@ window.onload = async () => {
         context.lineTo(-player.position.x + canvas.width + 1000, -player.position.y + canvas.height/2)
         context.stroke()
     }
+
+    function fullscreen(){
+        let canvas = document.getElementById('canvas');
+
+        if(canvas.webkitRequestFullScreen) {
+            canvas.webkitRequestFullScreen();
+        }
+        else {
+            canvas.mozRequestFullScreen();
+        }
+    }
+
+    let buttonFullScreen = document.getElementById('buttonFullScreen')
+    buttonFullScreen.addEventListener("click",fullscreen)
 }

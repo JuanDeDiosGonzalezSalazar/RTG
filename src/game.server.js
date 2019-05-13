@@ -14,8 +14,8 @@ class Player{
             x: x,
             y: y
         }
-        this.width = 64
-        this.heigth = 64
+        this.width = 48
+        this.heigth = 48
         this.stuck = false
         this.boundingBox = {
             top: 0,
@@ -152,11 +152,11 @@ let framesToSkip = 0
 let skippedFrames = 0
 let timedFrame = 0
 
-let framesPersSecond = 60
+let framesPerSecond = 60
 
 function loop(){
     if((endTime - startTime) >= 1000) {
-        framesToSkip = frame/framesPersSecond
+        framesToSkip = frame/framesPerSecond
 
         startTime = Date.now()
         frame = 0
@@ -165,7 +165,7 @@ function loop(){
     if((skippedFrames >= framesToSkip) && framesToSkip > 0){
         timedFrame++
         
-        if(timedFrame >= framesPersSecond){
+        if(timedFrame >= framesPerSecond){
             timedFrame = 0
         }
         skippedFrames = 0
