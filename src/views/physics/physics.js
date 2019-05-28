@@ -61,19 +61,35 @@ let isPIP = false;
         Physics.context.putImageData(imageData, 0, 0)
     }
 
-    let point = new Point([0, 0])
-    let polygon = new Polygon([[50, 100], [100, 100], [40, 40]])
+    let cwa = document.getElementById('clockWiseAbove')
+    let cwb = document.getElementById('clockWiseBelow')
+    let ccwa = document.getElementById('counterClockWiseAbove')
+    let ccwb = document.getElementById('counterClockWiseBelow')
+
+    let point = new Point([0, 5])
+    let polygon = new Polygon([[10, 10], [100, 50], [75, 15], [35, 40]])
     
     let frameCounter = 0;
     setInterval(() => {
-        console.log('FPS:', frameCounter)
-        frameCounter = 0
-    }, 1000)
+    }, 100)
 
     function update(){
         frameCounter++
         clear()
         point.draw()
+        winding = pointPolygonCollision(point.location, polygon.vertices)
+
+        cwa.innerText = winding.cwa
+        cwb.innerText = winding.cwb
+        ccwa.innerText = winding.ccwa
+        ccwb.innerText = winding.ccwb
+
+        if(winding.cwa && winding.cwb || winding.ccwa && winding.ccwb){
+            isPIP = true
+        }else{
+            isPIP = false
+        }
+
         if(point.location[0] < canvas.width-1){
             point.location[0]++
         }else{
@@ -84,8 +100,7 @@ let isPIP = false;
                 point.location[1] = 0
             }
         }
-        isPIP = pointPolygonCollision(point.location, polygon.vertices)
-        line.draw()
+
         polygon.draw()
         requestAnimationFrame(update)
     }

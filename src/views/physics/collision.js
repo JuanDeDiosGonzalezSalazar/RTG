@@ -24,10 +24,12 @@ function pointLineCollision(point, line) {
 }
 
 function pointPolygonCollision(point, polygon) {
-    let nextVertex = null
     let currentVertex = null
-    let clockwiseCounter = 0
-    let counterClockwiseCounter = 0
+    let nextVertex = null
+    let clockwiseCounterAbove = 0
+    let clockwiseCounterBelow = 0
+    let counterClockwiseCounterAbove = 0
+    let counterClockwiseCounterBelow = 0
     for (let vertex = 0; vertex < polygon.length; vertex++) {
         currentVertex = polygon[vertex]
         if (polygon[vertex + 1]) {
@@ -42,9 +44,9 @@ function pointPolygonCollision(point, polygon) {
                 let b = currentVertex[1] - (m * currentVertex[0])
                 let y = (m * point[0]) + b
                 if (y < point[1]) {
-                    clockwiseCounter++
+                    clockwiseCounterAbove++
                 } else {
-                    counterClockwiseCounter++
+                    counterClockwiseCounterBelow++
                 }
             }
         } else {
@@ -53,22 +55,29 @@ function pointPolygonCollision(point, polygon) {
                 let b = currentVertex[1] - (m * currentVertex[0])
                 let y = (m * point[0]) + b
                 if (y < point[1]) {
-                    counterClockwiseCounter++
+                    counterClockwiseCounterAbove++
                 } else {
-                    clockwiseCounter++
+                    clockwiseCounterBelow++
                 }
             }
         }
     }
 
-    return ((clockwiseCounter - counterClockwiseCounter) != 0) ? true : false
+    return {
+        cwa: clockwiseCounterAbove,
+        cwb: clockwiseCounterBelow,
+        ccwa: counterClockwiseCounterAbove,
+        ccwb: counterClockwiseCounterBelow
+    }
 }
 
 // function pointPolygonCollision(point, polygon) {
 //     let nextVertex = null
 //     let currentVertex = null
-//     let clockwiseCounter = 0
-//     let counterClockwiseCounter = 0
+//     let clockwiseCounterAbove = 0
+//     let clockwiseCounterBelow = 0
+//     let counterClockwiseCounterAbove = 0
+//     let counterClockwiseCounterBelow = 0
 //     console.log(point)
 //     console.log(polygon)
 //     for (let vertex = 0; vertex < polygon.length; vertex++) {
@@ -80,24 +89,23 @@ function pointPolygonCollision(point, polygon) {
 //         }
 
 //         if (currentVertex[0] < nextVertex[0]) {
-//             console.log(`Current X(${currentVertex[0]}) < Next X(${nextVertex[0]})`)
-//             console.log(`${currentVertex[0]} <= ${point[0]} && ${nextVertex[0]} >= ${point[0]}`)
+//             console.log('Left to Right')
 //             if (currentVertex[0] <= point[0] && nextVertex[0] >= point[0]) {
+//                 console.log('Crosses y axis')
 //                 let m = slopeOfLine([currentVertex, nextVertex])
 //                 let b = currentVertex[1] - (m * currentVertex[0])
 //                 let y = (m * point[0]) + b
-//                 console.log(`${y} at x(${point[0]})`)
 //                 if (y < point[1]) {
-//                     console.log('Crosses y axis clockwise')
-//                     clockwiseCounter++
+//                     console.log('Above x axis')
+//                     console.log('Clockwise')
+//                     clockwiseCounterAbove++
 //                 } else {
-//                     console.log('Crosses y axis counterclockwise')
-//                     counterClockwiseCounter++
+//                     console.log('Below x axis')
+//                     console.log('Counter-clockwise')
+//                     counterClockwiseCounterBelow++
 //                 }
 //             }
 //         } else {
-//             console.log(`Current X(${currentVertex[0]}) > Next X(${nextVertex[0]})`)
-//             console.log(`${currentVertex[0]} >= ${point[0]} && ${nextVertex[0]} <= ${point[0]}`)
 //             if (currentVertex[0] >= point[0] && nextVertex[0] <= point[0]) {
 //                 let m = slopeOfLine([currentVertex, nextVertex])
 //                 let b = currentVertex[1] - (m * currentVertex[0])
@@ -105,17 +113,25 @@ function pointPolygonCollision(point, polygon) {
 //                 console.log(`${y} at x(${point[0]})`)
 //                 if (y < point[1]) {
 //                     console.log('Crosses y axis counterclockwise')
-//                     counterClockwiseCounter++
+//                     counterClockwiseCounterAbove++
 //                 } else {
 //                     console.log('Crosses y axis clockwise')
-//                     clockwiseCounter++
+//                     clockwiseCounterBelow++
 //                 }
 //             }
 //         }
 //         console.log('')
 //     }
 
-//     console.log('Clockwise Count:', clockwiseCounter)
-//     console.log('Counter-Clockwise Count:', counterClockwiseCounter)
-//     return ((clockwiseCounter - counterClockwiseCounter) != 0) ? true : false
+//     console.log('Clockwise Count Above:', clockwiseCounterAbove)
+//     console.log('Clockwise Count Below:', clockwiseCounterBelow)
+//     console.log('Counter-Clockwise Count Above:', counterClockwiseCounterAbove)
+//     console.log('Counter-Clockwise Count Below:', counterClockwiseCounterBelow)
+
+//     return {
+//         cwa: clockwiseCounterAbove,
+//         cwb: clockwiseCounterBelow,
+//         ccwa: counterClockwiseCounterAbove,
+//         ccwb: counterClockwiseCounterBelow
+//     }
 // }
