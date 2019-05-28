@@ -7,6 +7,7 @@ window.onload = async () => {
 
     let showBoundingBoxes = true
     let showAxisGuidelines = true
+    let grayScaleOn = false
 
     const server = location.hostname
 
@@ -289,6 +290,10 @@ window.onload = async () => {
 
             players[id].draw()
         })
+
+        if (grayScaleOn) {
+            grayScale()
+        }
     })
 
     socket.on('newPlayer', (player) => {
@@ -336,6 +341,11 @@ window.onload = async () => {
             case 50: // Show Bounding Boxes
                 showAxisGuidelines = !showAxisGuidelines ? true : false
                 console.log('Show axis guidelines:', showBoundingBoxes)
+                break;
+
+            case 51: // Show Bounding Boxes
+                grayScaleOn = !grayScaleOn ? true : false
+                console.log('grayScaleOn:', grayScaleOn)
                 break;
         }
     })
@@ -396,6 +406,20 @@ window.onload = async () => {
         else {
             canvas.mozRequestFullScreen();
         }
+    }
+
+    function grayScale() {
+        let imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        let data = imageData.data
+
+        for (let x = 0; x < data.length; x += 4) {
+            let average = (data[x] + data[x + 1] + data[x + 2]) / 3
+            data[x] = average
+            data[x + 1] = average
+            data[x + 2] = average
+        }
+
+        context.putImageData(imageData, 0, 0)
     }
 
     let buttonFullScreen = document.getElementById('buttonFullScreen')
