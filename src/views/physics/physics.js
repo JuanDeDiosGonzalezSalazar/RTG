@@ -65,13 +65,24 @@ let isPIP = false;
     let cwb = document.getElementById('clockWiseBelow')
     let ccwa = document.getElementById('counterClockWiseAbove')
     let ccwb = document.getElementById('counterClockWiseBelow')
+    let pPoint = document.getElementById('point')
 
-    let point = new Point([0, 5])
+    let point = new Point([0, 10])
     let polygon = new Polygon([[10, 10], [100, 50], [75, 15], [35, 40]])
     
     let frameCounter = 0;
     setInterval(() => {
-    }, 100)
+        if(point.location[0] < canvas.width-1){
+            point.location[0]++
+        }else{
+            point.location[0] = 0
+            if(point.location[1] < canvas.height-1){
+                point.location[1]++
+            }else{
+                point.location[1] = 0
+            }
+        }
+    }, 1000)
 
     function update(){
         frameCounter++
@@ -83,22 +94,12 @@ let isPIP = false;
         cwb.innerText = winding.cwb
         ccwa.innerText = winding.ccwa
         ccwb.innerText = winding.ccwb
+        pPoint.innerText = `${point.location}`
 
         if(winding.cwa && winding.cwb || winding.ccwa && winding.ccwb){
             isPIP = true
         }else{
             isPIP = false
-        }
-
-        if(point.location[0] < canvas.width-1){
-            point.location[0]++
-        }else{
-            point.location[0] = 0
-            if(point.location[1] < canvas.height-1){
-                point.location[1]++
-            }else{
-                point.location[1] = 0
-            }
         }
 
         polygon.draw()
