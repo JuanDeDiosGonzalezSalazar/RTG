@@ -71,67 +71,52 @@ function pointPolygonCollision(point, polygon) {
     }
 }
 
-// function pointPolygonCollision(point, polygon) {
-//     let nextVertex = null
-//     let currentVertex = null
-//     let clockwiseCounterAbove = 0
-//     let clockwiseCounterBelow = 0
-//     let counterClockwiseCounterAbove = 0
-//     let counterClockwiseCounterBelow = 0
-//     console.log(point)
-//     console.log(polygon)
-//     for (let vertex = 0; vertex < polygon.length; vertex++) {
-//         currentVertex = polygon[vertex]
-//         if (polygon[vertex + 1]) {
-//             nextVertex = polygon[vertex + 1]
-//         } else {
-//             nextVertex = polygon[0]
-//         }
+function crossProduct(vector1, vector2) {
+    return (vector1[0] * vector2[1]) - (vector1[1] * vector2[0])
+}
 
-//         if (currentVertex[0] < nextVertex[0]) {
-//             console.log('Left to Right')
-//             if (currentVertex[0] <= point[0] && nextVertex[0] >= point[0]) {
-//                 console.log('Crosses y axis')
-//                 let m = slopeOfLine([currentVertex, nextVertex])
-//                 let b = currentVertex[1] - (m * currentVertex[0])
-//                 let y = (m * point[0]) + b
-//                 if (y < point[1]) {
-//                     console.log('Above x axis')
-//                     console.log('Clockwise')
-//                     clockwiseCounterAbove++
-//                 } else {
-//                     console.log('Below x axis')
-//                     console.log('Counter-clockwise')
-//                     counterClockwiseCounterBelow++
-//                 }
-//             }
-//         } else {
-//             if (currentVertex[0] >= point[0] && nextVertex[0] <= point[0]) {
-//                 let m = slopeOfLine([currentVertex, nextVertex])
-//                 let b = currentVertex[1] - (m * currentVertex[0])
-//                 let y = (m * point[0]) + b
-//                 console.log(`${y} at x(${point[0]})`)
-//                 if (y < point[1]) {
-//                     console.log('Crosses y axis counterclockwise')
-//                     counterClockwiseCounterAbove++
-//                 } else {
-//                     console.log('Crosses y axis clockwise')
-//                     clockwiseCounterBelow++
-//                 }
-//             }
-//         }
-//         console.log('')
-//     }
+function pointPolygonCollision2(point, polygon) {
+    let windingNumber = 0;
 
-//     console.log('Clockwise Count Above:', clockwiseCounterAbove)
-//     console.log('Clockwise Count Below:', clockwiseCounterBelow)
-//     console.log('Counter-Clockwise Count Above:', counterClockwiseCounterAbove)
-//     console.log('Counter-Clockwise Count Below:', counterClockwiseCounterBelow)
+    // Loop each edge
+    for (let vertex = 0; vertex < polygon.length; vertex++) {
+        currentVertex = polygon[vertex]
+        if (polygon[vertex + 1]) {
+            nextVertex = polygon[vertex + 1]
+        } else {
+            nextVertex = polygon[0]
+        }
 
-//     return {
-//         cwa: clockwiseCounterAbove,
-//         cwb: clockwiseCounterBelow,
-//         ccwa: counterClockwiseCounterAbove,
-//         ccwb: counterClockwiseCounterBelow
-//     }
-// }
+        let whereCrosses = 0 // 11 Avobe 0 On -1 Below
+
+        // For a point inside a polygon, one edge should cross y axis once above and once below
+        // Either counterclockwise or clockwise, otherwise, is outside
+        // So we should only care for when an edge crosses a point y axis
+        if ((currentVertex[0] < point[0]) && (nextVertex[0] > point[0])) {
+            // An edge crossed y's point axis from  Left to Right
+            let vector1 = [point[0] - currentVertex[0], point[1] - currentVertex[1]]
+            let vector2 = [nextVertex[0] - currentVertex[0], nextVertex[1] - currentVertex[1]]
+            let z = crossProduct(vector1, vector2)
+            if(z > 0){
+                windingNumber--
+            }else if(z < 0){
+                windingNumber++
+            }
+        } else if ((currentVertex[0] > point[0]) && (nextVertex[0] < point[0])) {
+            // An edge crossed y's point axis from Right To Left
+            let vector1 = [point[0] - currentVertex[0], point[1] - currentVertex[1]]
+            let vector2 = [nextVertex[0] - currentVertex[0], nextVertex[1] - currentVertex[1]]
+            let z = crossProduct(vector1, vector2)
+            if(z > 0){
+                windingNumber++
+            }else if(z < 0){
+                windingNumber--
+            }
+        } else {
+            // Not crossin a y's point axis, then ignore this edge
+            continue;
+        }
+    }
+
+    return windingNumber == 0 ? true : false
+}

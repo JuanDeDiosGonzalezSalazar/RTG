@@ -1,4 +1,4 @@
-class Physics{
+class Physics {
     static canvas
     static context
     static imageData
@@ -18,13 +18,13 @@ let isPIP = false;
     canvas = Physics.canvas = document.getElementById('canvas')
     context = Physics.context = canvas.getContext('2d')
 
-    canvas.width = 1920/16
-    canvas.height = 1080/10
+    canvas.width = 1920 / 16
+    canvas.height = 1080 / 18
 
     Physics.imageData = context.getImageData(0, 0, canvas.width, canvas.height)
     Physics.data = Physics.imageData.data
 
-    for(let y = 0; y < canvas.height; y++){
+    for (let y = 0; y < canvas.height; y++) {
         Physics.rows[y] = canvas.width * 4 * y
     }
 
@@ -33,8 +33,8 @@ let isPIP = false;
 
     let line = new Line(10, 10, 200, 100)
     // let polygon = new Polygon([[50, 300], [500, 100], [40, 40]])
-    
-    function clear(){
+
+    function clear() {
         context.fillStyle = "#FFFFFF"
         context.fillRect(0, 0, canvas.width, canvas.height)
     }
@@ -47,15 +47,15 @@ let isPIP = false;
         }
     })
 
-    function grayScale(){
+    function grayScale() {
         let imageData = Physics.context.getImageData(0, 0, canvas.width, canvas.height)
         let data = imageData.data
 
-        for(let x = 0; x < data.length; x +=4){
-            let average = (data[x] + data[x+1] + data[x+2])/3
-            data[x]     = average
-            data[x+1]   = average
-            data[x+2]   = average
+        for (let x = 0; x < data.length; x += 4) {
+            let average = (data[x] + data[x + 1] + data[x + 2]) / 3
+            data[x] = average
+            data[x + 1] = average
+            data[x + 2] = average
         }
 
         Physics.context.putImageData(imageData, 0, 0)
@@ -66,45 +66,50 @@ let isPIP = false;
     let ccwa = document.getElementById('counterClockWiseAbove')
     let ccwb = document.getElementById('counterClockWiseBelow')
     let pPoint = document.getElementById('point')
+    let pWN = document.getElementById('windingNumber')
 
-    let point = new Point([0, 10])
+    let point = new Point([100, 30])
     let polygon = new Polygon([[10, 10], [100, 50], [75, 15], [35, 40]])
-    
-    let frameCounter = 0;
+
     setInterval(() => {
-        if(point.location[0] < canvas.width-1){
+        // movePoint()
+    }, 1000)
+
+    function movePoint() {
+        if (point.location[0] < canvas.width - 1) {
             point.location[0]++
-        }else{
+        } else {
             point.location[0] = 0
-            if(point.location[1] < canvas.height-1){
+            if (point.location[1] < canvas.height - 1) {
                 point.location[1]++
-            }else{
+            } else {
                 point.location[1] = 0
             }
         }
-    }, 1000)
+    }
 
-    function update(){
-        frameCounter++
+    let windingNumber = 0
+
+    function update() {
         clear()
         point.draw()
-        winding = pointPolygonCollision(point.location, polygon.vertices)
+        polygon.draw()
 
-        cwa.innerText = winding.cwa
-        cwb.innerText = winding.cwb
-        ccwa.innerText = winding.ccwa
-        ccwb.innerText = winding.ccwb
+        windingNumber = pointPolygonCollision2(point.location, polygon.vertices)
+
         pPoint.innerText = `${point.location}`
+        pWN.innerText = windingNumber
 
-        if(winding.cwa && winding.cwb || winding.ccwa && winding.ccwb){
+        if (windingNumber != 0) {
             isPIP = true
-        }else{
+        } else {
             isPIP = false
         }
 
-        polygon.draw()
+        // movePoint()
+
         requestAnimationFrame(update)
     }
-    
+
     update()
 })()
