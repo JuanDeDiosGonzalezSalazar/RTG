@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "server": "node ./src/game.server.js",
+    "client": "node ./src/web.server.js",
+    "client:debug": "DEBUG=* node ./src/web.server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
